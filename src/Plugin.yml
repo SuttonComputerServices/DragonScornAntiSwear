@@ -1,0 +1,10 @@
+name: DragonScornAntiSwear
+version: 1.2.6
+main: demonhunter1.dragonscorn.antiswear.Main
+commands:
+  addword:
+    description: Add a word to Bad Words
+    usage: /<command>
+  removeword:
+    description: Remove a word to Bad Words
+    usage: /<command>
