@@ -1,0 +1,101 @@
+package demonhunter1.dragonscorn.antiswear;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import net.md_5.bungee.api.ChatColor;
+
+public class Main extends JavaPlugin implements Listener{
+
+	public static Main instance;
+	
+	@Override
+	public void onEnable() {
+		getServer().getPluginManager().registerEvents((Listener) this,this);
+		if(!getConfig().contains("words")) {
+			List<String> badwords = new ArrayList<String>();
+			badwords.add("bitch");
+			badwords.add("fuck");
+			badwords.add("shit");
+			badwords.add("cunt");
+			badwords.add("motherfucker");
+			getConfig().set("words", badwords);
+		}
+		saveConfig();
+		
+	}
+	
+	@Override
+	public void onDisable() {
+		saveConfig();
+		
+	}
+	
+	// unsure how to implement catching both uppercase and lowercase words. and unsure how to implement the Staffchat, Tried the way i thought it should work, but it did not. not really a big deal.
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerChat(AsyncPlayerChatEvent e) {
+		String msg = e.getMessage();
+		List<String> words = getConfig().getStringList("words");
+		for(int i = 0; i < words.size(); i++) {
+			if(msg.contains(words.get(i).equalsIgnoreCase())) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatColor.RED + "no swearing in this chat!");
+			}
+		}
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
+	{
+		if(cmd.getName().equalsIgnoreCase("addword")) 
+		{
+			if(sender.hasPermission("chatmanager.addword")) 
+			{
+				if(args.length==1) 
+				{
+					String word = args[0].toLowerCase();
+					List<String> words = getConfig().getStringList("words");
+					if(!words.contains(word)) 
+					{
+						words.add(word);
+						this.getConfig().set("words", words);
+						saveConfig();
+						sender.sendMessage(ChatColor.GREEN + "Bad Word is now in the list!");
+					} else sender.sendMessage(ChatColor.RED + "Bad Word is already in list!");
+				} else sender.sendMessage(ChatColor.RED + "Incorrect args!");
+			} else sender.sendMessage(ChatColor.RED + "You do not have permission!");
+			return true;
+		}
+		
+		if(cmd.getName().equalsIgnoreCase("removeword")) 
+		{
+			if(sender.hasPermission("chatmanager.removeword")) 
+			{
+				if(args.length==1) 
+				{
+					String words = args[0].toLowerCase();
+					List<String> word = getConfig().getStringList("words");
+					if(words.contains(words)) 
+					{
+						word.remove(words);
+						this.getConfig().set("words", words);
+						saveConfig();
+						sender.sendMessage(ChatColor.GREEN + "Bad Word is now remove from the list!");
+					} else sender.sendMessage(ChatColor.RED + "Bad Word is not in the list!");
+				} else sender.sendMessage(ChatColor.RED + "Incorrect args!");
+			} else sender.sendMessage(ChatColor.RED + "You do not have permission!");
+			return true;
+		}
+		return false;
+	}
+	
+}	
